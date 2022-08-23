@@ -1,0 +1,64 @@
+version: "3"
+
+services:
+  rabbit:
+    image: "rabbitmq:management"
+    hostname: rabbit
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBIT_USERNAME}
+      RABBITMQ_DEFAULT_PASS: ${RABBIT_PASSWORD}
+    ports:
+      - 15672:15672
+    volumes:
+      - "rabbitmq_data:/var/lib/rabbitmq"
+
+  service1:
+    build: .
+    container_name: service1
+    restart: always
+    environment:
+      LOG_LEVEL: INFO
+
+      QUEUE_HOST: rabbit
+      QUEUE_PORT: 5672
+      QUEUE_USERNAME: ${SERVICE1_NAME}
+      QUEUE_PASSWORD: ${SERVICE1_AUTH}
+    depends_on:
+      - rabbit
+    command: "python3 subscriber.py"
+
+  service2:
+    build: .
+    container_name: service2
+    restart: always
+    environment:
+      LOG_LEVEL: INFO
+
+      QUEUE_HOST: rabbit
+      QUEUE_PORT: 5672
+      QUEUE_USERNAME: ${SERVICE2_NAME}
+      QUEUE_PASSWORD: ${SERVICE2_AUTH}
+    depends_on:
+      - rabbit
+    command: "python3 subscriber.py"
+
+  publisher:
+    build: .
+    container_name: publisher
+    restart: always
+    environment:
+      LOG_LEVEL: INFO
+
+      API_HOST: http://rabbit
+      API_PORT: 15672
+      API_USER: ${RABBIT_USERNAME}
+      API_PASS: ${RABBIT_PASSWORD}
+
+      SERVICES: ${SERVICE1_NAME}=${SERVICE1_AUTH};${SERVICE2_NAME}=${SERVICE2_AUTH}
+    depends_on:
+      - rabbit
+    command: "python3 publisher.py"
+
+volumes:
+  rabbitmq_data:
+    driver: local
