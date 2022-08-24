@@ -3,6 +3,7 @@
 from __future__ import print_function
 
 import os
+import sys
 import json
 import requests
 import base64
@@ -78,7 +79,7 @@ def enable_services(services):
 
       if (service_password == ""):
         raise Exception("Service password can not be blank !")
-        
+
     except Exception as e:
       logger.error(f"Configuration error: {str(e)}")
       continue
@@ -118,6 +119,10 @@ def notify_service(service, data):
 if __name__ == "__main__":
   services = os.environ.get("SERVICES","").split(';')
 
+  if len(services) == 0:
+    logger.error(f"No Services configured !")
+    sys.exit(-1)
+
   enable_services(services)
 
   topics = ['user', 'group']
@@ -126,7 +131,11 @@ if __name__ == "__main__":
     s = random.randrange(0, len(services))
     t = random.randrange(0, len(topics))
 
-    service_name, _ = services[s].split('=')
+    service_name = [x.strip() for x in services[s].split('=')][0]
+
+    if (service_name == ""):
+      logger.error(f"Service name can not be blank !")
+      break
 
     notify_service(service_name, {
       topics[t]: random.randrange(1, 99999)
