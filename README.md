@@ -34,7 +34,7 @@ You can take a in-depth look into the runtime dynamics of the different containe
 docker-compose logs -f publisher
 ```
 
-Will show somethis like:
+Will show something like:
 
 ```
 publisher  | Starting publisher...
@@ -62,9 +62,6 @@ docker-compose logs -f service1
 Will show something like:
 
 ```
-
-```
-
 service1 | Starting service: ...
 service1 | 2022-08-24 08:19:03,575 INFO Connecting to amqp://SERVICE1:AA1@rabbit:5672/SERVICE1...
 service1 | 2022-08-24 08:19:03,577 INFO Pika version 1.3.0 connecting to ('192.168.112.2', 5672)
@@ -77,6 +74,7 @@ service1 | 2022-08-24 08:19:22,998 INFO [USER:89902] Notification received !
 service1 | 2022-08-24 08:19:29,044 INFO [GROUP:71659] Notification received !
 service1 | 2022-08-24 08:19:32,050 INFO [GROUP:82134] Notification received !
 service1 | 2022-08-24 08:19:35,068 INFO [USER:62532] Notification received !
+```
 
 ### Management dashboard
 
