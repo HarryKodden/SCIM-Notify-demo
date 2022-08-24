@@ -1,29 +1,28 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
+
 import os
 import pika
 import json
+import logging
 
-from logger import logger
+log_level = os.environ.get('LOG_LEVEL', 'ERROR')
 
-class Queue(object):
+logging.basicConfig(
+    level=logging.getLevelName(log_level),
+    format='%(asctime)s %(levelname)s %(message)s')
 
-  def __init__(self,
-      host=os.environ.get('QUEUE_HOST', 'localhost'),
-      port=os.environ.get('QUEUE_PORT', 5672),
-      username=os.environ.get('QUEUE_USERNAME', 'quest'),
-      password=os.environ.get('QUEUE_PASSWORD', 'quest')
-    ):
+logger = logging.getLogger()
 
-    logger.info(f"Connecting to {host}:{port} as user {username}/{password}")
+class AMQP(object):
+
+  def __init__(self, uri):
+
+    logger.info(f"Connecting to {uri}...")
 
     self.connection = pika.BlockingConnection(
-        pika.ConnectionParameters(
-        host,
-        port,
-        username,
-        pika.PlainCredentials(username, password)
-      )
+      pika.URLParameters(uri)
     )
 
     self.exchange = 'amq.topic'
@@ -49,7 +48,7 @@ class Queue(object):
 
         for k in data.keys():
           if k not in handlers:
-            raise Exception(f"No handler for: {k} !")
+            raise Exception(f"No handler for topic: {k} !")
 
         for k,v in handlers.items():
           if k in data:
@@ -66,5 +65,8 @@ class Queue(object):
       logger.info("Start consuming...")
       self.channel.start_consuming()
     except KeyboardInterrupt:
-      logger.info("Stop consuming...")
-      self.channel.stop_consuming()
+      logger.info("Keyboard interrup received !")
+    except Exception as e:
+      logger.info(f"Stop consuming because: {str(e)}")
+
+    self.channel.stop_consuming()

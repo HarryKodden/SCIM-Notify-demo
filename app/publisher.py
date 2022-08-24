@@ -9,7 +9,7 @@ import base64
 import random
 import time
 
-from logger import logger
+from support import logger
 
 class Control(object):
 
@@ -66,27 +66,35 @@ my_control = Control(
   password = os.environ.get('API_PASS', "guest")
 )
 
-def enables_services(services):
+def enable_services(services):
 
   for service in services:
     service_name, service_password = service.split('=')
-    logger.debug(f"SERVICE: {service_name} --> {service_password}")
 
+    logger.info(f"Enabling service: '{service_name}'...")
     my_control.api(f"/api/vhosts/{service_name}", method='PUT')
+
+    logger.info(f"Adding credentials for service: '{service_name}'...")
     my_control.api(f"/api/users/{service_name}", method='PUT', payload={ 
         "password": service_password, 
         "tags": ""
       }
     )
 
+    logger.info(f"Adding permissions for service: '{service_name}'...")
     my_control.api(f"/api/permissions/{service_name}/{service_name}", method='PUT', payload={ 
         "configure": ".*", 
         "write": ".*",
         "read": ".*"
       }
     )
+    logger.info(f"Service: '{service_name}' is now enabled !")
+    
 
 def notify_service(service, data):
+  for k,v in data.items():
+    logger.info(f"Notify {service_name} for update on '{k}' value: '{v}'...")
+  
   my_control.api(f"/api/exchanges/{service}/amq.topic/publish", method='POST', payload={
       "properties": {},
       "routing_key": "",
@@ -98,7 +106,7 @@ def notify_service(service, data):
 if __name__ == "__main__":
   services = os.environ.get("SERVICES",[]).split(';')
 
-  enables_services(services)
+  enable_services(services)
 
   topics = ['user', 'group']
 

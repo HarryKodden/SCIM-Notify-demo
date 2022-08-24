@@ -18,14 +18,16 @@ services:
     restart: always
     environment:
       LOG_LEVEL: INFO
-
-      QUEUE_HOST: rabbit
-      QUEUE_PORT: 5672
-      QUEUE_USERNAME: ${SERVICE1_NAME}
-      QUEUE_PASSWORD: ${SERVICE1_AUTH}
+      URI: amqp://${SERVICE1_NAME:-guest}:${SERVICE1_AUTH:-guest}@rabbit:5672/${SERVICE1_NAME:-%2F}
     depends_on:
       - rabbit
-    command: "python3 subscriber.py"
+    command:
+      - sh
+      - -c
+      - |
+        sleep 15
+        echo "Starting service: $${SERVICE1_NAME}..."
+        python3 subscriber.py
 
   service2:
     build: .
@@ -33,14 +35,16 @@ services:
     restart: always
     environment:
       LOG_LEVEL: INFO
-
-      QUEUE_HOST: rabbit
-      QUEUE_PORT: 5672
-      QUEUE_USERNAME: ${SERVICE2_NAME}
-      QUEUE_PASSWORD: ${SERVICE2_AUTH}
+      URI: amqp://${SERVICE2_NAME:-guest}:${SERVICE2_AUTH:-guest}@rabbit:5672/${SERVICE2_NAME:-%2F}
     depends_on:
       - rabbit
-    command: "python3 subscriber.py"
+    command:
+      - sh
+      - -c
+      - |
+        sleep 15
+        echo "Starting service: $${SERVICE2_NAME}..."
+        python3 subscriber.py
 
   publisher:
     build: .
@@ -57,7 +61,13 @@ services:
       SERVICES: ${SERVICE1_NAME}=${SERVICE1_AUTH};${SERVICE2_NAME}=${SERVICE2_AUTH}
     depends_on:
       - rabbit
-    command: "python3 publisher.py"
+    command:
+      - sh
+      - -c
+      - |
+        sleep 10
+        echo "Starting publisher..."
+        python3 publisher.py
 
 volumes:
   rabbitmq_data:
