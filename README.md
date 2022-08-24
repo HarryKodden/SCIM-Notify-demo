@@ -24,6 +24,62 @@ Then observe the processing by:
 docker-compose logs -f
 ```
 
+### Runtime details...
+
+You can take a in-depth look into the runtime dynamics of the different containers, here are some examples.
+
+#### Publisher
+
+```
+docker-compose logs -f publisher
+```
+
+Will show somethis like:
+
+```
+publisher  | Starting publisher...
+publisher  | 2022-08-24 08:18:58,652 INFO Enabling service: 'SERVICE1'...
+publisher  | 2022-08-24 08:18:58,790 INFO Adding credentials for service: 'SERVICE1'...
+publisher  | 2022-08-24 08:18:58,795 INFO Adding permissions for service: 'SERVICE1'...
+publisher  | 2022-08-24 08:18:58,801 INFO Service: 'SERVICE1' is now enabled !
+publisher  | 2022-08-24 08:18:58,801 INFO Enabling service: 'SERVICE2'...
+publisher  | 2022-08-24 08:18:58,836 INFO Adding credentials for service: 'SERVICE2'...
+publisher  | 2022-08-24 08:18:58,840 INFO Adding permissions for service: 'SERVICE2'...
+publisher  | 2022-08-24 08:18:58,846 INFO Service: 'SERVICE2' is now enabled !
+publisher  | 2022-08-24 08:18:58,846 INFO Notify SERVICE2 for update on 'group' value: '95134'...
+publisher  | 2022-08-24 08:19:01,902 INFO Notify SERVICE1 for update on 'group' value: '24229'...
+publisher  | 2022-08-24 08:19:04,909 INFO Notify SERVICE1 for update on 'group' value: '95161'...
+publisher  | 2022-08-24 08:19:07,925 INFO Notify SERVICE2 for update on 'group' value: '22059'...
+publisher  | 2022-08-24 08:19:10,939 INFO Notify SERVICE2 for update on 'group' value: '50472'...
+```
+
+#### Service 1
+
+```
+docker-compose logs -f service1
+```
+
+Will show something like:
+
+```
+
+```
+
+service1 | Starting service: ...
+service1 | 2022-08-24 08:19:03,575 INFO Connecting to amqp://SERVICE1:AA1@rabbit:5672/SERVICE1...
+service1 | 2022-08-24 08:19:03,577 INFO Pika version 1.3.0 connecting to ('192.168.112.2', 5672)
+....
+service1 | 2022-08-24 08:19:03,582 INFO Created channel=1
+service1 | 2022-08-24 08:19:03,588 INFO Start consuming...
+service1 | 2022-08-24 08:19:04,918 INFO [GROUP:95161] Notification received !
+service1 | 2022-08-24 08:19:16,982 INFO [USER:96903] Notification received !
+service1 | 2022-08-24 08:19:22,998 INFO [USER:89902] Notification received !
+service1 | 2022-08-24 08:19:29,044 INFO [GROUP:71659] Notification received !
+service1 | 2022-08-24 08:19:32,050 INFO [GROUP:82134] Notification received !
+service1 | 2022-08-24 08:19:35,068 INFO [USER:62532] Notification received !
+
+### Management dashboard
+
 And for the Rabit Manamegent dashboard you can go to http://localhost:15672 and inspect everything what is going on in the rabbit environment. Credentials can be found and adjusted off course in the **.env** file.
 
 As a first excercise for the reader, add a service3 to the running environment...
