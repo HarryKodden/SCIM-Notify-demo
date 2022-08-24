@@ -69,7 +69,19 @@ my_control = Control(
 def enable_services(services):
 
   for service in services:
-    service_name, service_password = service.split('=')
+
+    try:
+      service_name, service_password = [x.strip() for x in service.split('=')]
+
+      if (service_name == ""):
+        raise Exception("Service name can not be blank !")
+
+      if (service_password == ""):
+        raise Exception("Service password can not be blank !")
+        
+    except Exception as e:
+      logger.error(f"Configuration error: {str(e)}")
+      continue
 
     logger.info(f"Enabling service: '{service_name}'...")
     my_control.api(f"/api/vhosts/{service_name}", method='PUT')
@@ -104,7 +116,7 @@ def notify_service(service, data):
   )
 
 if __name__ == "__main__":
-  services = os.environ.get("SERVICES",[]).split(';')
+  services = os.environ.get("SERVICES","").split(';')
 
   enable_services(services)
 
