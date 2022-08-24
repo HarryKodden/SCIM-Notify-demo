@@ -16,8 +16,16 @@ docker-compose build
 docker-compose up -d
 ```
 
+Please not that the containers startup simultaneously but that they depend on the readiness of the rabbit container. As long as the rabbit container is not ready, the other container will fail to start properly. No worries though, they will constantly restart and at some moment the startup errors will go silent and interactions between the containers will word as designed. So, be patient !
+
 Then observe the processing by:
 
 ```
 docker-compose logs -f
 ```
+
+And for the Rabit Manamegent dashboard you can go to http://localhost:15672 and inspect everything what is going on in the rabbit environment. Credentials can be found and adjusted off course in the **.env** file.
+
+As a first excercise for the reader, add a service3 to the running environment...
+
+Enjoy !
