@@ -55,8 +55,12 @@ class Broker(object):
 
       logger.debug(f"[{response.status_code}] {method} {url}...")
 
-      return json.loads(response.text)
+      result = {}
+      if len(response.content) > 0:
+        result = json.loads(response.content)
 
+      return result
+      
     except requests.exceptions.SSLError:
       logger.error("SSL Validation error.")
 
@@ -100,7 +104,7 @@ class Broker(object):
         "payload": json.dumps(data),
         "payload_encoding": "string"
       }
-    ).get('routed', False) == True
+    ).get('routed', False)
 
 
 if __name__ == "__main__":
