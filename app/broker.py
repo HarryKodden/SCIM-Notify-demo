@@ -3,7 +3,6 @@
 from __future__ import print_function
 
 import os
-import sys
 import json
 import requests
 import base64
@@ -56,8 +55,7 @@ class Broker(object):
 
       logger.debug(f"[{response.status_code}] {method} {url}...")
 
-      if (response.text > ''):
-        return response.json()
+      return json.loads(response.text)
 
     except requests.exceptions.SSLError:
       logger.error("SSL Validation error.")
@@ -96,13 +94,13 @@ class Broker(object):
     for k,v in data.items():
       logger.info(f"Notify {service} for update on '{k}' value: '{v}'...")
     
-    self.api(f"/api/exchanges/{service}/amq.topic/publish", method='POST', payload={
+    return self.api(f"/api/exchanges/{service}/amq.topic/publish", method='POST', payload={
         "properties": {},
         "routing_key": "",
         "payload": json.dumps(data),
         "payload_encoding": "string"
       }
-    )
+    )['routed'] == True
 
 
 if __name__ == "__main__":
