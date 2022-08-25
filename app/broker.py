@@ -7,15 +7,13 @@ import sys
 import json
 import requests
 import base64
-import random
-import time
 import logging
 
 log_level = os.environ.get('LOG_LEVEL', 'ERROR')
 
 logging.basicConfig(
     level=logging.getLevelName(log_level),
-    format='%(asctime)s %(levelname)s %(message)s')
+    format='%(asctime)s [BROKER] %(levelname)s %(message)s')
 
 logger = logging.getLogger()
 
@@ -131,22 +129,3 @@ if __name__ == "__main__":
 
       except Exception as e:
         logger.error(f"Configuration error: {str(e)}")
-        continue
-
-    topics = ['user', 'group']
-
-    while len(services) > 0:
-      s = random.randrange(0, len(services))
-      t = random.randrange(0, len(topics))
-
-      service_name = [x.strip() for x in services[s].split('=')][0]
-
-      if (service_name == ""):
-        logger.error(f"Service name can not be blank !")
-        break
-
-      broker.notify_service(service_name, {
-        topics[t]: random.randrange(1, 99999)
-      })
-
-      time.sleep(3)
