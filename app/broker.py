@@ -66,6 +66,12 @@ class Broker(object):
 
   def enable_service(self, service_name, service_password):
 
+    if (service_name == ""):
+      raise Exception("Service name can not be blank !")
+
+    if (service_password == ""):
+      raise Exception("Service password can not be blank !")
+
     logger.info(f"Enabling service: '{service_name}'...")
     self.api(f"/api/vhosts/{service_name}", method='PUT')
 
@@ -112,20 +118,10 @@ if __name__ == "__main__":
 
     if len(services) == 0:
       logger.error(f"No Services configured !")
-      sys.exit(-1)
 
     for service in services:
-    
       try:
         service_name, service_password = [x.strip() for x in service.split('=')]
-
-        if (service_name == ""):
-          raise Exception("Service name can not be blank !")
-
-        if (service_password == ""):
-          raise Exception("Service password can not be blank !")
-
         broker.enable_service(service_name, service_password)
-
       except Exception as e:
         logger.error(f"Configuration error: {str(e)}")
