@@ -53,10 +53,10 @@ services:
     environment:
       LOG_LEVEL: INFO
 
-      API_HOST: http://rabbit
-      API_PORT: 15672
-      API_USER: ${RABBIT_USERNAME}
-      API_PASS: ${RABBIT_PASSWORD}
+      BROKER_HOST: http://rabbit
+      BROKER_PORT: 15672
+      BROKER_USER: ${RABBIT_USERNAME}
+      BROKER_PASS: ${RABBIT_PASSWORD}
 
       SERVICES: ${SERVICE1_NAME}=${SERVICE1_AUTH};${SERVICE2_NAME}=${SERVICE2_AUTH}
     depends_on:
