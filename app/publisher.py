@@ -19,7 +19,7 @@ logging.basicConfig(
 
 logger = logging.getLogger()
 
-class Control(object):
+class Broker(object):
 
   def __init__(self, server, port=None, username='guest', password='guest', verify=True, cacert=None):
     self.server = server
@@ -67,27 +67,20 @@ class Control(object):
     return None
 
 
-my_control = Control(
-  os.environ.get("API_HOST", "http://localhost"),
-  port = os.environ.get("API_PORT", None),
-  username = os.environ.get('API_USER', "guest"),
-  password = os.environ.get('API_PASS', "guest")
-)
-
-def enable_service(service_name, service_password):
+def enable_service(broker, service_name, service_password):
 
   logger.info(f"Enabling service: '{service_name}'...")
-  my_control.api(f"/api/vhosts/{service_name}", method='PUT')
+  broker.api(f"/api/vhosts/{service_name}", method='PUT')
 
   logger.info(f"Adding credentials for service: '{service_name}'...")
-  my_control.api(f"/api/users/{service_name}", method='PUT', payload={ 
+  broker.api(f"/api/users/{service_name}", method='PUT', payload={ 
       "password": service_password, 
       "tags": ""
     }
   )
 
   logger.info(f"Adding permissions for service: '{service_name}'...")
-  my_control.api(f"/api/permissions/{service_name}/{service_name}", method='PUT', payload={ 
+  broker.api(f"/api/permissions/{service_name}/{service_name}", method='PUT', payload={ 
       "configure": ".*", 
       "write": ".*",
       "read": ".*"
@@ -96,11 +89,11 @@ def enable_service(service_name, service_password):
 
   logger.info(f"Service: '{service_name}' is now enabled !")
     
-def notify_service(service, data):
+def notify_service(broker, service, data):
   for k,v in data.items():
     logger.info(f"Notify {service_name} for update on '{k}' value: '{v}'...")
   
-  my_control.api(f"/api/exchanges/{service}/amq.topic/publish", method='POST', payload={
+  broker.api(f"/api/exchanges/{service}/amq.topic/publish", method='POST', payload={
       "properties": {},
       "routing_key": "",
       "payload": json.dumps(data),
@@ -109,43 +102,51 @@ def notify_service(service, data):
   )
 
 if __name__ == "__main__":
-  services = os.environ.get("SERVICES","").split(';')
 
-  if len(services) == 0:
-    logger.error(f"No Services configured !")
-    sys.exit(-1)
+  with Broker(
+    os.environ.get("API_HOST", "http://localhost"),
+    port = os.environ.get("API_PORT", None),
+    username = os.environ.get('API_USER', "guest"),
+    password = os.environ.get('API_PASS', "guest")
+  ) as broker:
 
-  for service in services:
-  
-    try:
-      service_name, service_password = [x.strip() for x in service.split('=')]
+    services = os.environ.get("SERVICES","").split(';')
+
+    if len(services) == 0:
+      logger.error(f"No Services configured !")
+      sys.exit(-1)
+
+    for service in services:
+    
+      try:
+        service_name, service_password = [x.strip() for x in service.split('=')]
+
+        if (service_name == ""):
+          raise Exception("Service name can not be blank !")
+
+        if (service_password == ""):
+          raise Exception("Service password can not be blank !")
+
+        enable_service(broker, service_name, service_password)
+
+      except Exception as e:
+        logger.error(f"Configuration error: {str(e)}")
+        continue
+
+    topics = ['user', 'group']
+
+    while len(services) > 0:
+      s = random.randrange(0, len(services))
+      t = random.randrange(0, len(topics))
+
+      service_name = [x.strip() for x in services[s].split('=')][0]
 
       if (service_name == ""):
-        raise Exception("Service name can not be blank !")
+        logger.error(f"Service name can not be blank !")
+        break
 
-      if (service_password == ""):
-        raise Exception("Service password can not be blank !")
+      notify_service(broker, service_name, {
+        topics[t]: random.randrange(1, 99999)
+      })
 
-      enable_service(service_name, service_password)
-
-    except Exception as e:
-      logger.error(f"Configuration error: {str(e)}")
-      continue
-
-  topics = ['user', 'group']
-
-  while len(services) > 0:
-    s = random.randrange(0, len(services))
-    t = random.randrange(0, len(topics))
-
-    service_name = [x.strip() for x in services[s].split('=')][0]
-
-    if (service_name == ""):
-      logger.error(f"Service name can not be blank !")
-      break
-
-    notify_service(service_name, {
-      topics[t]: random.randrange(1, 99999)
-    })
-
-    time.sleep(3)
+      time.sleep(3)
