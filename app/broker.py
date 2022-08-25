@@ -100,7 +100,7 @@ class Broker(object):
         "payload": json.dumps(data),
         "payload_encoding": "string"
       }
-    )['routed'] == True
+    ).get('routed', False) == True
 
 
 if __name__ == "__main__":
