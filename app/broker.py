@@ -66,40 +66,40 @@ class Broker(object):
 
     return None
 
+  def enable_service(self, service_name, service_password):
 
-def enable_service(broker, service_name, service_password):
+    logger.info(f"Enabling service: '{service_name}'...")
+    self.api(f"/api/vhosts/{service_name}", method='PUT')
 
-  logger.info(f"Enabling service: '{service_name}'...")
-  broker.api(f"/api/vhosts/{service_name}", method='PUT')
+    logger.info(f"Adding credentials for service: '{service_name}'...")
+    self.api(f"/api/users/{service_name}", method='PUT', payload={ 
+        "password": service_password, 
+        "tags": ""
+      }
+    )
 
-  logger.info(f"Adding credentials for service: '{service_name}'...")
-  broker.api(f"/api/users/{service_name}", method='PUT', payload={ 
-      "password": service_password, 
-      "tags": ""
-    }
-  )
+    logger.info(f"Adding permissions for service: '{service_name}'...")
+    self.api(f"/api/permissions/{service_name}/{service_name}", method='PUT', payload={ 
+        "configure": ".*", 
+        "write": ".*",
+        "read": ".*"
+      }
+    )
 
-  logger.info(f"Adding permissions for service: '{service_name}'...")
-  broker.api(f"/api/permissions/{service_name}/{service_name}", method='PUT', payload={ 
-      "configure": ".*", 
-      "write": ".*",
-      "read": ".*"
-    }
-  )
+    logger.info(f"Service: '{service_name}' is now enabled !")
 
-  logger.info(f"Service: '{service_name}' is now enabled !")
+  def notify_service(self, service, data):
+    for k,v in data.items():
+      logger.info(f"Notify {service_name} for update on '{k}' value: '{v}'...")
     
-def notify_service(broker, service, data):
-  for k,v in data.items():
-    logger.info(f"Notify {service_name} for update on '{k}' value: '{v}'...")
-  
-  broker.api(f"/api/exchanges/{service}/amq.topic/publish", method='POST', payload={
-      "properties": {},
-      "routing_key": "",
-      "payload": json.dumps(data),
-      "payload_encoding": "string"
-    }
-  )
+    self.api(f"/api/exchanges/{service}/amq.topic/publish", method='POST', payload={
+        "properties": {},
+        "routing_key": "",
+        "payload": json.dumps(data),
+        "payload_encoding": "string"
+      }
+    )
+
 
 if __name__ == "__main__":
 
@@ -127,7 +127,7 @@ if __name__ == "__main__":
         if (service_password == ""):
           raise Exception("Service password can not be blank !")
 
-        enable_service(broker, service_name, service_password)
+        broker.enable_service(service_name, service_password)
 
       except Exception as e:
         logger.error(f"Configuration error: {str(e)}")
@@ -145,7 +145,7 @@ if __name__ == "__main__":
         logger.error(f"Service name can not be blank !")
         break
 
-      notify_service(broker, service_name, {
+      broker.notify_service(service_name, {
         topics[t]: random.randrange(1, 99999)
       })
 

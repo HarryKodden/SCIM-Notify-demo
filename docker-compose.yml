@@ -67,7 +67,7 @@ services:
       - |
         sleep 10
         echo "Starting publisher..."
-        python3 publisher.py
+        python3 broker.py
 
 volumes:
   rabbitmq_data:
