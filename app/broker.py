@@ -90,7 +90,7 @@ class Broker(object):
 
   def notify_service(self, service, data):
     for k,v in data.items():
-      logger.info(f"Notify {service_name} for update on '{k}' value: '{v}'...")
+      logger.info(f"Notify {service} for update on '{k}' value: '{v}'...")
     
     self.api(f"/api/exchanges/{service}/amq.topic/publish", method='POST', payload={
         "properties": {},
