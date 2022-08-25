@@ -52,7 +52,7 @@ class Broker(object):
       headers['Authorization'] = self.authorization
     
     try:
-      logger.debug(f"API: {method} {url} {json.dumps(payload)}")
+      logger.debug(f"BROKER: {method} {url} {json.dumps(payload)}")
 
       response = requests.request(method, url, data=json.dumps(payload), headers=headers, verify=self.verify)
 
@@ -104,10 +104,10 @@ def notify_service(broker, service, data):
 if __name__ == "__main__":
 
   with Broker(
-    os.environ.get("API_HOST", "http://localhost"),
-    port = os.environ.get("API_PORT", None),
-    username = os.environ.get('API_USER', "guest"),
-    password = os.environ.get('API_PASS', "guest")
+    os.environ.get("BROKER_HOST", "http://localhost"),
+    port = os.environ.get("BROKER_PORT", None),
+    username = os.environ.get('BROKER_USER', "guest"),
+    password = os.environ.get('BROKER_PASS', "guest")
   ) as broker:
 
     services = os.environ.get("SERVICES","").split(';')
