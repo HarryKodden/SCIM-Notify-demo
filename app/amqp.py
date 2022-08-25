@@ -7,12 +7,6 @@ import pika
 import json
 import logging
 
-log_level = os.environ.get('LOG_LEVEL', 'ERROR')
-
-logging.basicConfig(
-    level=logging.getLevelName(log_level),
-    format='%(asctime)s %(levelname)s %(message)s')
-
 logger = logging.getLogger()
 
 class AMQP(object):

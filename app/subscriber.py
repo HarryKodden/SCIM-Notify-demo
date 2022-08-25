@@ -1,8 +1,19 @@
 #/usr/bin/env python3
 
 import os
+import logging
 
-from support import AMQP, logger
+from amqp import AMQP
+
+
+log_level = os.environ.get('LOG_LEVEL', 'ERROR')
+
+logging.basicConfig(
+    level=logging.getLevelName(log_level),
+    format='%(asctime)s %(levelname)s %(message)s')
+
+logger = logging.getLogger()
+
 
 def user(id):
   logger.info(f"[USER:{id}] Notification received !")

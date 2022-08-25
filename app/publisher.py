@@ -9,8 +9,15 @@ import requests
 import base64
 import random
 import time
+import logging
 
-from support import logger
+log_level = os.environ.get('LOG_LEVEL', 'ERROR')
+
+logging.basicConfig(
+    level=logging.getLevelName(log_level),
+    format='%(asctime)s %(levelname)s %(message)s')
+
+logger = logging.getLogger()
 
 class Control(object):
 
