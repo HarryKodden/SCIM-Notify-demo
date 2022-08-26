@@ -3,14 +3,13 @@
 import os
 import logging
 
-from amqp import AMQP
-
+from AMQP import AMQP
 
 log_level = os.environ.get('LOG_LEVEL', 'ERROR')
 
 logging.basicConfig(
     level=logging.getLevelName(log_level),
-    format='%(asctime)s %(levelname)s %(message)s')
+    format='%(asctime)s [SUBSCRIBER] %(levelname)s %(message)s')
 
 logger = logging.getLogger()
 
